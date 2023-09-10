@@ -1,6 +1,7 @@
 # CloakTalk
-
+![CloakTalk (1)](https://github.com/OffendedNerd/CloakTalk/assets/93387617/5ed4ffb7-37d7-4cab-9a0b-1638f9dc397f)
 [![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://travis-ci.org/joemccann/dillinger)
+
 
 CloakTalk is a state-of-the-art instant messaging application designed for privacy-conscious users. Built on robust architecture, this secure messaging platform ensures end-to-end encryption, real-time communication, and enhanced user experience. This synopsis report provides an overview of the CloakTalk project. 
 ## Features
