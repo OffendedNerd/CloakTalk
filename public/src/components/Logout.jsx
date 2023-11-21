@@ -4,26 +4,40 @@ import { BiPowerOff } from "react-icons/bi";
 import styled from "styled-components";
 import axios from "axios";
 import { logoutRoute } from "../utils/APIRoutes";
-export default function Logout() {
-  const navigate = useNavigate();
-  const handleClick = async () => {
-    const id = await JSON.parse(
-      localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
-    )._id;
-    const data = await axios.get(`${logoutRoute}/${id}`);
-    if (data.status === 200) {
-      localStorage.clear();
-      navigate("/login");
+
+export default function SignOutButton() {
+  const navigator = useNavigate();
+
+  const handleSignOut = async () => {
+    try {
+      const userId = await getUserIdFromLocalStorage();
+      await axios.get(`${logoutRoute}/${userId}`);
+      clearLocalStorage();
+      navigator("/login");
+    } catch (error) {
+      console.error("Sign-out failed:", error.message);
     }
   };
+
+  const getUserIdFromLocalStorage = async () => {
+    const userData = await JSON.parse(
+      localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
+    );
+    return userData._id;
+  };
+
+  const clearLocalStorage = () => {
+    localStorage.clear();
+  };
+
   return (
-    <Button onClick={handleClick}>
+    <SignOutBtn onClick={handleSignOut}>
       <BiPowerOff />
-    </Button>
+    </SignOutBtn>
   );
 }
 
-const Button = styled.button`
+const SignOutBtn = styled.button`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -32,6 +46,7 @@ const Button = styled.button`
   background-color: #9a86f3;
   border: none;
   cursor: pointer;
+
   svg {
     font-size: 1.3rem;
     color: #ebe7ff;
