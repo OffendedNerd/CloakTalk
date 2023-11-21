@@ -1,39 +1,45 @@
-const Messages = require("../models/messageModel");
+const MessageModel = require("../models/messageModel");
 
-module.exports.getMessages = async (req, res, next) => {
+const fetchAndSendMessages = async (req, res, next) => {
   try {
-    const { from, to } = req.body;
+    const { sender, receiver } = req.body;
 
-    const messages = await Messages.find({
-      users: {
-        $all: [from, to],
-      },
+    const queriedMessages = await MessageModel.find({
+      users: { $all: [sender, receiver] },
     }).sort({ updatedAt: 1 });
 
-    const projectedMessages = messages.map((msg) => {
-      return {
-        fromSelf: msg.sender.toString() === from,
-        message: msg.message.text,
-      };
-    });
-    res.json(projectedMessages);
-  } catch (ex) {
-    next(ex);
+    const processedMessages = queriedMessages.map((message) => ({
+      sentBySender: message.sender.toString() === sender,
+      content: message.message.text,
+    }));
+
+    res.json({ result: processedMessages });
+  } catch (err) {
+    next(err);
   }
 };
 
-module.exports.addMessage = async (req, res, next) => {
+const saveNewMessage = async (req, res, next) => {
   try {
-    const { from, to, message } = req.body;
-    const data = await Messages.create({
-      message: { text: message },
-      users: [from, to],
-      sender: from,
+    const { sender, receiver, text } = req.body;
+
+    const newMessage = await MessageModel.create({
+      message: { text: text },
+      users: [sender, receiver],
+      sender: sender,
     });
 
-    if (data) return res.json({ msg: "Message added successfully." });
-    else return res.json({ msg: "Failed to add message to the database" });
-  } catch (ex) {
-    next(ex);
+    if (newMessage) {
+      res.json({ success: true, message: "Message saved successfully." });
+    } else {
+      res.json({ success: false, message: "Failed to save the message in the database." });
+    }
+  } catch (error) {
+    next(error);
   }
+};
+
+module.exports = {
+  fetchAndSendMessages,
+  saveNewMessage,
 };
