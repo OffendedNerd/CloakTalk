@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import styled from "styled-components";
 import { useNavigate, Link } from "react-router-dom";
-import Logo from "../assets/logo.svg";
+import AppLogo from "../assets/logo.svg";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { loginRoute } from "../utils/APIRoutes";
+import { loginUserRoute } from "../utils/APIRoutes";
 
 export default function Login() {
-  const navigate = useNavigate();
-  const [values, setValues] = useState({ username: "", password: "" });
+  const navigateTo = useNavigate();
+  const [credentials, setCredentials] = useState({ username: "", password: "" });
   const toastOptions = {
     position: "bottom-right",
     autoClose: 8000,
@@ -17,24 +17,22 @@ export default function Login() {
     draggable: true,
     theme: "dark",
   };
+
   useEffect(() => {
     if (localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
-      navigate("/");
+      navigateTo("/");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleChange = (event) => {
-    setValues({ ...values, [event.target.name]: event.target.value });
+  const handleInputChange = (event) => {
+    setCredentials({ ...credentials, [event.target.name]: event.target.value });
   };
 
   const validateForm = () => {
-    const { username, password } = values;
-    if (username === "") {
-      toast.error("Email and Password is required.", toastOptions);
-      return false;
-    } else if (password === "") {
-      toast.error("Email and Password is required.", toastOptions);
+    const { username, password } = credentials;
+    if (username === "" || password === "") {
+      toast.error("Username and password are required.", toastOptions);
       return false;
     }
     return true;
@@ -43,21 +41,21 @@ export default function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (validateForm()) {
-      const { username, password } = values;
-      const { data } = await axios.post(loginRoute, {
+      const { username, password } = credentials;
+      const { data } = await axios.post(loginUserRoute, {
         username,
         password,
       });
-      if (data.status === false) {
+      if (!data.status) {
         toast.error(data.msg, toastOptions);
       }
-      if (data.status === true) {
+      if (data.status) {
         localStorage.setItem(
           process.env.REACT_APP_LOCALHOST_KEY,
           JSON.stringify(data.user)
         );
 
-        navigate("/");
+        navigateTo("/");
       }
     }
   };
@@ -67,25 +65,25 @@ export default function Login() {
       <FormContainer>
         <form action="" onSubmit={(event) => handleSubmit(event)}>
           <div className="brand">
-            <img src={Logo} alt="logo" />
-            <h1>CloakTalk</h1>
+            <img src={AppLogo} alt="app-logo" />
+            <h1>CloakChat</h1>
           </div>
           <input
             type="text"
             placeholder="Username"
             name="username"
-            onChange={(e) => handleChange(e)}
-            min="3"
+            onChange={(e) => handleInputChange(e)}
+            minLength="3"
           />
           <input
             type="password"
             placeholder="Password"
             name="password"
-            onChange={(e) => handleChange(e)}
+            onChange={(e) => handleInputChange(e)}
           />
           <button type="submit">Log In</button>
           <span>
-            Don't have an account ? <Link to="/register">Create One.</Link>
+            Don't have an account? <Link to="/register">Create One.</Link>
           </span>
         </form>
       </FormContainer>
