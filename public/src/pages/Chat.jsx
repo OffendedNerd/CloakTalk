@@ -9,51 +9,55 @@ import Contacts from "../components/Contacts";
 import Welcome from "../components/Welcome";
 
 export default function Chat() {
-  const navigate = useNavigate();
-  const socket = useRef();
-  const [contacts, setContacts] = useState([]);
-  const [currentChat, setCurrentChat] = useState(undefined);
-  const [currentUser, setCurrentUser] = useState(undefined);
+  const nav = useNavigate();
+  const soc = useRef();
+  const [cont, setCont] = useState([]);
+  const [curChat, setCurChat] = useState(undefined);
+  const [curUser, setCurUser] = useState(undefined);
+
   useEffect(async () => {
     if (!localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
-      navigate("/login");
+      nav("/login");
     } else {
-      setCurrentUser(
+      setCurUser(
         await JSON.parse(
           localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
         )
       );
     }
   }, []);
+
   useEffect(() => {
-    if (currentUser) {
-      socket.current = io(host);
-      socket.current.emit("add-user", currentUser._id);
+    if (curUser) {
+      soc.current = io(host);
+      soc.current.emit("add-user", curUser._id);
     }
-  }, [currentUser]);
+  }, [curUser]);
 
   useEffect(async () => {
-    if (currentUser) {
-      if (currentUser.isAvatarImageSet) {
-        const data = await axios.get(`${allUsersRoute}/${currentUser._id}`);
-        setContacts(data.data);
+    if (curUser) {
+      if (curUser.isAvatarImageSet) {
+        const data = await axios.get(`${allUsersRoute}/${curUser._id}`);
+        setCont(data.data);
       } else {
-        navigate("/setAvatar");
+        nav("/setAvatar");
       }
     }
-  }, [currentUser]);
-  const handleChatChange = (chat) => {
-    setCurrentChat(chat);
+  }, [curUser]);
+
+  const handleChange = (chat) => {
+    setCurChat(chat);
   };
+
   return (
     <>
       <Container>
         <div className="container">
-          <Contacts contacts={contacts} changeChat={handleChatChange} />
-          {currentChat === undefined ? (
+          <Contacts contacts={cont} changeChat={handleChange} />
+          {curChat === undefined ? (
             <Welcome />
           ) : (
-            <ChatContainer currentChat={currentChat} socket={socket} />
+            <ChatContainer currentChat={curChat} socket={soc} />
           )}
         </div>
       </Container>
@@ -70,6 +74,7 @@ const Container = styled.div`
   gap: 1rem;
   align-items: center;
   background-color: #131324;
+
   .container {
     height: 85vh;
     width: 85vw;
